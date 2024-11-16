@@ -28,14 +28,17 @@ const likeCount= ref(0);
 const likeClick= ref(0);
 const isLoading= ref(true);
 
-watch(likeCount,debounce(()=>{
-    fetch(`/api/posts/likes/${props.postId}`,{
-        method: 'PUT',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({likes: likeClick.value})
-    });
+watch(likeCount,debounce(async()=>{
+
+    // fetch(`/api/posts/likes/${props.postId}`,{
+    //     method: 'PUT',
+    //     headers: {
+    //         'Content-Type': 'application/json'
+    //     },
+    //     body: JSON.stringify({likes: likeClick.value})
+    // });
+
+    await actions.updatePostLikes({postId: props.postId, increment: likeClick.value});
     likeClick.value= 0;
     
 },500))
@@ -61,11 +64,15 @@ watch(likeCount,debounce(()=>{
     }
 
 const getCurrentLikles = async()=>{
-    const resp = await fetch(`/api/posts/likes/${props.postId}`);
 
-    if (!resp.ok) return;
+    const {data, error} = await actions.getPostLikes(props.postId);
+    // const resp = await fetch(`/api/posts/likes/${props.postId}`);
+    if (error) {
+        return alert(error.message);
+    }
+    // if (!resp.ok) return;
 
-const data =  await resp.json();
+// const data =  await resp.json();
 
 likeCount.value= data.likes;
 isLoading.value= false;
